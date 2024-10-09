@@ -9,7 +9,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVC,SVR
 #from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score,confusion_matrix,accuracy_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score,confusion_matrix,accuracy_score,classification_report, precision_score, recall_score, f1_score
 #import the global suicide dataset
 df=pd.read_csv('master.csv')
 print(df.head())
@@ -148,6 +148,14 @@ svc.fit(X_train_scaled, Y_train_class)
 #knn_class.fit(X_train_scaled, Y_train_class)
 
 # Step 8: Predict class labels and evaluate
+# Linear regression
+y_pred_lin_reg = lr.predict(X_test)
+y_pred_class_lin_reg = (y_pred_lin_reg > threshold).astype(int)
+
+# Decision Tree
+y_pred_decision_tree = dl.predict(X_test)
+y_pred_class_decision_tree = (y_pred_decision_tree > threshold).astype(int)
+
 # Random Forest
 y_pred_class_forest = (forest_class.predict(X_test) > 0.5).astype(int)
 
@@ -169,3 +177,94 @@ def print_classification_metrics(Y_test_class, Y_pred_class, model_name):
 print_classification_metrics(Y_test_class, y_pred_class_forest, "Random Forest Classifier")
 print_classification_metrics(Y_test_class, y_pred_class_svm, "SVM Classifier")
 #print_classification_metrics(Y_test_class, y_pred_class_knn, "KNN Classifier")
+
+
+# Function to plot the confusion matrix
+def plot_confusion_matrix(Y_test_class, Y_pred_class, model_name):
+    conf_matrix = confusion_matrix(Y_test_class, Y_pred_class)
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues", cbar=False)
+    plt.title(f'{model_name} - Confusion Matrix')
+    plt.ylabel('Actual')
+    plt.xlabel('Predicted')
+    plt.show()
+
+    # Function to print and visualize accuracy score
+def print_and_visualize_accuracy(Y_test_class, Y_pred_class, model_name):
+    acc_score = accuracy_score(Y_test_class, Y_pred_class)
+    print(f"{model_name} - Accuracy Score: {acc_score:.2f}")
+    # Plot accuracy score
+    plt.figure(figsize=(6, 4))
+    sns.barplot(x=[model_name], y=[acc_score])
+    plt.title(f'{model_name} - Accuracy Score')
+    plt.ylabel('Accuracy')
+    plt.ylim(0, 1)  # Ensuring the plot has a consistent range
+    plt.show()
+
+    # Linear Regressor
+plot_confusion_matrix(Y_test_class, y_pred_class_lin_reg, "Linear Regression (Classification)")
+print_and_visualize_accuracy(Y_test_class, y_pred_class_lin_reg, "Linear Regression (Classification)")
+
+   # Decision Tree Classifier
+plot_confusion_matrix(Y_test_class, y_pred_class_decision_tree, "Decision Tree (Classification)")
+print_and_visualize_accuracy(Y_test_class, y_pred_class_decision_tree, "Decision Tree (Classification)")
+
+    # Random Forest Classifier
+plot_confusion_matrix(Y_test_class, y_pred_class_forest, "Random Forest Classifier")
+print_and_visualize_accuracy(Y_test_class, y_pred_class_forest, "Random Forest Classifier")
+
+# SVM Classifier
+plot_confusion_matrix(Y_test_class, y_pred_class_svm, "SVM Classifier")
+print_and_visualize_accuracy(Y_test_class, y_pred_class_svm, "SVM Classifier")
+
+
+def print_classification_report(y_true, y_pred, model_name):
+    print(f"\nClassification Report for {model_name}:")
+    print(classification_report(y_true, y_pred))
+
+def calculate_classification_metrics(y_true, y_pred):
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred)
+    return precision, recall, f1
+
+# For Random Forest
+precision_forest, recall_forest, f1_forest = calculate_classification_metrics(Y_test_class, y_pred_class_forest)
+print_classification_report(Y_test_class, y_pred_class_forest, "Random Forest Classifier")
+
+# For SVM
+precision_svm, recall_svm, f1_svm = calculate_classification_metrics(Y_test_class, y_pred_class_svm)
+print_classification_report(Y_test_class, y_pred_class_svm, "SVM Classifier")
+
+# For Linear Regression
+precision_lin, recall_lin, f1_lin = calculate_classification_metrics(Y_test_class, y_pred_class_lin_reg)
+print_classification_report(Y_test_class, y_pred_class_lin_reg, "Linear Regression")
+
+# For Decision Tree
+precision_tree, recall_tree, f1_tree = calculate_classification_metrics(Y_test_class, y_pred_class_decision_tree)
+print_classification_report(Y_test_class, y_pred_class_decision_tree, "Decision Tree Classifier")
+
+# Collect the metrics for all models
+models = ['Random Forest', 'SVM', 'Linear Regression', 'Decision Tree']
+precisions = [precision_forest, precision_svm, precision_lin, precision_tree]
+recalls = [recall_forest, recall_svm, recall_lin, recall_tree]
+f1_scores = [f1_forest, f1_svm, f1_lin, f1_tree]
+
+# Plotting
+x = np.arange(len(models))  # the label locations
+width = 0.2  # the width of the bars
+
+fig, ax = plt.subplots(figsize=(10, 6))
+rects1 = ax.bar(x - width, precisions, width, label='Precision')
+rects2 = ax.bar(x, recalls, width, label='Recall')
+rects3 = ax.bar(x + width, f1_scores, width, label='F1 Score')
+
+# Add some text for labels, title and custom x-axis tick labels, etc.
+ax.set_xlabel('Models')
+ax.set_title('Precision, Recall, and F1 Score by Model')
+ax.set_xticks(x)
+ax.set_xticklabels(models)
+ax.legend()
+
+fig.tight_layout()
+plt.show()
