@@ -268,3 +268,6 @@ ax.legend()
 
 fig.tight_layout()
 plt.show()
+
+
+df_clean.to_csv("suicide_analysis_data.csv", index=False)
