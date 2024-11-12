@@ -24,3 +24,6 @@ Libraries: Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn,Scipy, Statsmodels
 Databases: SQL, Firebase
 Tools: Jupyter Notebook, Git, Tableau
 Project Structure
+
+Tableau Dasboard link for Global Suicide Trend Analysis
+https://public.tableau.com/app/profile/poorvi.raut/viz/GlobalSuicideTrendAnalysis/Dashboard1
